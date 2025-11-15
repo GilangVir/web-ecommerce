@@ -33,12 +33,28 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'avatar' => ['required', 'image', 'mimes:png,jpg,jpeg'],
+            'occupation' => ['required', 'string', 'max:255'],
+            'bank_name' => ['required', 'string', 'max:255'],
+            'bank_account' => ['required', 'string', 'max:255'],
+            'bank_account_number' => ['required', 'numeric', 'min:0'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
+
+        if($request->hasFile('avatar')){
+            $path = $request->file('avatar')->store('avatars', 'public');
+        }else{
+            $path = 'images/avatar-default.png';
+        }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'avatar' => $path,
+            'occupation' => $request->occupation,
+            'bank_name' => $request->bank_name,
+            'bank_account' => $request->bank_account,
+            'bank_account_number' => $request->bank_account_number,
             'password' => Hash::make($request->password),
         ]);
 
