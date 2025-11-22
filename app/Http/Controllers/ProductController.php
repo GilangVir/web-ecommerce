@@ -3,7 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
+
 
 class ProductController extends Controller
 {
@@ -12,7 +18,11 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $values = Product::where('creator_id', Auth::id())->get();
+        // dd($values);
+        return view('admin.products.index',[
+            'values' => $values
+        ]);
     }
 
     /**
@@ -20,7 +30,10 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+        return view('admin.products.create', [
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -28,8 +41,45 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        // dd($request->all());
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'cover' => ['required', 'image', 'mimes:png,jpg,jpeg'],
+            'path_file' => ['required', 'file', 'mimes:pdf'],
+            'about' => ['required', 'string', 'max:65535'],
+            'category_id' => ['required', 'integer'],
+            'price' => ['required', 'integer', 'min:0'],
+        ]);
+
+        // dd($validated);
+
+        DB::beginTransaction();
+         try{
+            if($request->hasFile('cover')){
+                $coverPath = $request->file('cover')->store('product_covers', 'public');
+                $validated['cover'] = $coverPath;
+            }
+            if($request->hasFile('path_file')){
+                $coverPath = $request->file('path_file')->store('product_file', 'public');
+                $validated['path_file'] = $coverPath;
+            }
+            $validated['slug'] = Str::slug($request->name);
+            $validated['creator_id'] = Auth::id();
+            $newProduct = Product::create($validated);
+            DB::commit();
+
+            return redirect()->route('admin.products.index')->with('success', 'Product created successfuly');
+         }
+         catch(\Exception $e){
+            DB::rollBack();
+
+            $error = ValidationException::withMessages([
+                'system_error' => ['System error!'. $e->getMessage()],
+            ]);
+
+            throw $error;
+         }
+    } 
 
     /**
      * Display the specified resource.
