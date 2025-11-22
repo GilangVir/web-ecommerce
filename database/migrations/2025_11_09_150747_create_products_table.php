@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('path_file');
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->unsignedBigInteger('creator_id');
+            $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('creator_id')->references('id')->on('users')->onDelete('cascade');
