@@ -19,8 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('total_price');
             $table->boolean('is_paid');
             $table->string('proof');
-            $table->timestamps();
             $table->softDeletes();
+            $table->timestamps();
 
             // pembuat
             $table->foreign('creator_id')->references('id')->on('users')->onDelete('cascade');
