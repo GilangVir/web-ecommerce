@@ -94,7 +94,11 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        //
+        $categories = Category::All();
+        return view('admin.products.edit', [
+            'categories' => $categories,
+            'product' => $product
+        ]);
     }
 
     /**
@@ -102,7 +106,41 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        //
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'cover' => ['sometimes', 'image', 'mimes:png,jpg,jpeg'],
+            'path_file' => ['sometimes', 'file', 'mimes:pdf'],
+            'about' => ['required', 'string', 'max:65535'],
+            'category_id' => ['required', 'integer'],
+            'price' => ['required', 'integer', 'min:0'],
+        ]);
+
+        DB::beginTransaction();
+         try{
+            if($request->hasFile('cover')){
+                $coverPath = $request->file('cover')->store('product_covers', 'public');
+                $validated['cover'] = $coverPath;
+            }
+            if($request->hasFile('path_file')){
+                $coverPath = $request->file('path_file')->store('product_file', 'public');
+                $validated['path_file'] = $coverPath;
+            }
+            $validated['slug'] = Str::slug($request->name);
+            $validated['creator_id'] = Auth::id();
+            $product->update($validated);
+            DB::commit();
+
+            return redirect()->route('admin.products.index')->with('success', 'Product created successfuly');
+         }
+         catch(\Exception $e){
+            DB::rollBack();
+
+            $error = ValidationException::withMessages([
+                'system_error' => ['System error!'. $e->getMessage()],
+            ]);
+
+            throw $error;
+         }
     }
 
     /**
@@ -110,6 +148,15 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        //
+        // dd($product);
+        try{
+            $product->delete();
+            return redirect()->route('admin.products.index')->with('success', 'Product deleted successfuly');
+        }
+        catch(\Exception $e){
+            $error = ValidationException::withMessages([
+                'system_error' => ['System error!' . $e->getMessage()],
+            ]);
+        }
     }
 }
