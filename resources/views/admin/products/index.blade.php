@@ -21,28 +21,34 @@
                     </div>
                 @endif
 
-                <a href="{{ route('admin.products.create') }}" class=" w-fit py-3 px-5 bg-indigo-950 text-white">
-                    Add New Products
-                </a>
+                <div class="flex flex-row justify-between">
+                    <h3 class="text-indigo-950 font-bold text-2xl">My Products</h3>
+                    <a href="{{ route('admin.products.create') }}" class="rounded-full w-fit py-3 px-5 bg-indigo-950 text-white">
+                        Add New Products
+                    </a>
+                </div>
 
                 @forelse ($values as $value)
                     <div class="item-product flex flex-row justify-between items-center">
-                        <img src="{{ Storage::url($value->cover) }}" class="h-[100px] w-auto" alt="">
-                        <div class="gap-x-3">
-                            <h3>{{ $value->name }}</h3>
-                            <p>{{ $value->category->name }}</p>
+                        <div class="flex flex-row items-center gap-x-5">
+                            <img src="{{ Storage::url($value->cover) }}" class="rounded-2xl h-[100px] w-auto" alt="">
+                            <div>
+                                <h3 class="text-indigo-950 font-bold text-xl">{{ $value->name }}</h3>
+                                <p class="text-slate-500 text-sm">{{ $value->category->name }}</p>
+                            </div>
                         </div>
+
                         <div>
-                            <p>Rp. {{ $value->price }}</p>
+                            <p class="text-indigo-950 font-bold text-xl">Rp. {{number_format($value->price)}}</p>
                         </div>
                         <div class="flex flex-row gap-x-3">
-                            <a href="{{ route('admin.products.edit', $value) }}" class="py-3 px-5 bg-indigo-500 text-white">
+                            <a href="{{ route('admin.products.edit', $value) }}" class="rounded-full py-3 px-5 bg-indigo-500 text-white font-bold">
                                 Edit
                             </a>
                             <form action="{{ route('admin.products.destroy', $value) }}" method="POST">
                                 @csrf
                                 @method('DELETE')
-                                <button class="py-3 px-5 bg-red-500 text-white">
+                                <button class="rounded-full py-3 px-5 bg-red-500 text-white">
                                     Delete
                                 </button>
                             </form>
