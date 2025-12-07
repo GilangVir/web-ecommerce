@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProductOrder;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class ProductOrderController extends Controller
 {
@@ -12,7 +15,55 @@ class ProductOrderController extends Controller
      */
     public function index()
     {
-        //
+        $productOrders = ProductOrder::where('creator_id', Auth::id())->get();
+        return view('admin.product_orders.index',[
+            'productOrders' => $productOrders
+        ]);
+    }
+
+    // creator tidak bisa membeli produknya sendiri, maka menampilkan transaksi pembeli berdasarkan buyer_id
+    public function transaction()
+    {
+        $transactions = ProductOrder::where('buyer_id', Auth::id())->get();
+        
+        return view('admin.product_orders.transaction', [
+        'transactions' => $transactions
+        ]);
+    }
+
+    public function transaction_detail(ProductOrder $productOrder)
+    {
+        // dd($transactions);
+        return view('admin.product_orders.transaction_details', [
+            'value' => $productOrder
+        ]);
+    }
+
+    public function downloadFile(ProductOrder $productOrder)
+    {
+        $user = Auth::id();
+        $product_id = $productOrder->product_id; 
+
+        $value = ProductOrder::where('buyer_id', $user)
+            ->where('product_id', $product_id)
+            ->where('is_paid', 1)
+            ->first();
+        
+        if(!$value)
+        {
+            session()->flash('error', 'Anda tidak dapat mengunduh file ini karna belum melakukan pembayaran');
+            return redirect()->back();
+        }
+
+        $productDetails = Product::find($product_id);
+        $filePath = $productDetails->path_file;
+
+        if(!Storage::disk('public')->exists($filePath)){
+            abort(404);
+        }
+
+        /** @var \Illuminate\Filesystem\FilesystemAdapter */
+        return Storage::disk('public')->download($filePath);
     }
 
     /**
@@ -36,7 +87,10 @@ class ProductOrderController extends Controller
      */
     public function show(ProductOrder $productOrder)
     {
-        //
+        // dd($productOrder);
+        return view('admin.product_orders.details', [
+            'value' => $productOrder
+        ]);
     }
 
     /**
@@ -52,7 +106,9 @@ class ProductOrderController extends Controller
      */
     public function update(Request $request, ProductOrder $productOrder)
     {
-        //
+        // dd($productOrder);
+        $productOrder->update(['is_paid' => true]);
+        return redirect()->back()->with('message', 'Order success updated');
     }
 
     /**

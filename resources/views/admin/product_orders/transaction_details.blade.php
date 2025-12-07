@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Details Product Order') }}
+            {{ __('Transaction Details') }}
         </h2>
     </x-slot>
 
@@ -41,13 +41,11 @@
                         <p>Bukti Pembayaran :</p>
                         <img src="{{ Storage::url($value->proof) }}" class="h-auto w-[300px]">
                         <div class="flex flex-row gap-x-3">
-                            <form action="{{ route('admin.product_orders.update', $value) }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                <button type="submit" class="py-3 px-5 bg-indigo-500 text-white">
-                                    Improve Now
-                                </button>
-                            </form>
+                            @if($value->is_paid)
+                                <a href="{{ route('admin.product_orders.download.file', $value) }}" class="py-3 px-5 bg-indigo-500 text-white">
+                                    Download
+                                </a>
+                            @endif
                         </div>
                     </div>
             </div>

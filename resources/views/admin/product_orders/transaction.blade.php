@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('My Product orders') }}
+            {{ __('My Transactions') }}
         </h2>
     </x-slot>
 
@@ -20,7 +20,7 @@
                         </ul>
                     </div>
                 @endif
-                @forelse ($productOrders as $order)
+                @forelse ($transactions as $order)
                     <div class="item-product flex flex-row justify-between items-center">
                         <div class="item-product flex flex-row justify-between items-center">
                             <div class="flex flex-row items-center gap-x-5">
@@ -31,36 +31,33 @@
                                     </div>
                             </div>
                         </div>
-                        
-                        <div class="flex flex-row gap-x-6 items-center">
-                                <div>
-                                    <p class="text-slate-500 text-sm">Total Price:</p>
-                                    <p>Rp. {{number_format($order->total_price)}}</p>
-                                </div>
-                                <div>
-                                    <p class="text-slate-500 text-sm">Status:</p>
-                                    @if($order->is_paid)
-                                        <span class="py-2 px-5 rounded-full bg-green-500 text-white font-bold text-sm">
-                                            PAID
-                                        </span>
-                                    @else
-                                        <span class="py-2 px-5 rounded-full bg-orange-500 text-white font-bold text-sm">
-                                            PENDING
-                                        </span>
-                                    @endif
-                                </div>
-                        </div>
 
+                            <div>
+                                 <p class="text-indigo-950 font-bold text-xl">Rp. {{ $order->total_price }}</p>
+                            </div>
+                            <div class="flex flex-row gap-x-5 items-center">
+                                @if($order->is_paid)
+                                    <span class="py-2 px-5 rounded-full bg-green-500 text-white font-bold text-sm">
+                                        PAID
+                                    </span>
+                                @else
+                                    <span class="py-2 px-5 rounded-full bg-orange-500 text-white font-bold text-sm">
+                                        PENDING
+                                    </span>
+                                @endif
+                            </div>
                         <div class="flex flex-row gap-x-3">
-                            <a href="{{ route('admin.product_orders.show', $order) }}" class="rounded-full py-3 px-5 bg-indigo-500 text-white">
+                            <a href="{{ route('admin.product_orders.transaction.detail', $order) }}" class="rounded-full py-3 px-5 bg-indigo-500 text-white">
                                 Details
                             </a>
                         </div>
                     </div>
                 @empty
-                    <p>Belum ada orderan product tersedia</p>
+                    <p>transaksi anda belum tersedia</p>
                 @endforelse
             </div>
         </div>
     </div>
 </x-app-layout>
+
+                
